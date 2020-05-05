@@ -8,17 +8,37 @@ Find example code for CPX on:
 https://github.com/adafruit/Adafruit_CircuitPython_CircuitPlayground/tree/master/examples
 """
 
-# import CPX library
+import time
 from adafruit_circuitplayground import cp
 
+cp.pixels.auto_write = False
+cp.pixels.brightness = 0.3
+
+# Set these based on your ambient temperature in Celsius for best results!
+minimum_temp = 24
+maximum_temp = 30
+
+
+def scale_range(value):
+    """Scale a value from the range of minimum_temp to maximum_temp (temperature range) to 0-10
+    (the number of NeoPixels). Allows remapping temperature value to pixel position."""
+    return int((value - minimum_temp) / (maximum_temp - minimum_temp) * 10)
+
+
 while True:
-    # start your code here
-    cp.red_led = True
-    if cp.temperature < 26 :
-        print("coffee getting cold!")
-        cp.pixels.fill((0, 0, 255))
-    else:
-        print("coffee is NOT cold yet")
-        cp.pixels.fill((255, 0, 0))
-    
-    pass
+    peak = scale_range(cp.temperature)
+    print(cp.temperature)
+    print(int(peak))
+
+    for i in range(10):
+        if i <= peak:
+            if peak < 5:
+                print("cold!")
+                cp.pixels[i] = (0, 255, 255)
+            else:
+                print("NOT cold yet")
+                cp.pixels[i] = (255, 0, 0)
+        else:
+            cp.pixels[i] = (0, 0, 0)
+    cp.pixels.show()
+    time.sleep(0.05)
